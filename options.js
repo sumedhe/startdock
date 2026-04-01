@@ -406,6 +406,53 @@ function initQuickAdd() {
   });
 }
 
+/* ── Export to browser bookmarks ── */
+
+async function exportToBrowser() {
+  const btn = document.getElementById('btn-export-browser');
+  btn.disabled = true;
+  btn.textContent = 'Exporting…';
+
+  try {
+    // Remove any existing StartDock folder from the bookmarks bar
+    const existing = await new Promise(resolve => {
+      chrome.bookmarks.search({ title: 'StartDock' }, results => {
+        resolve(results.filter(r => !r.url && r.parentId === '1'));
+      });
+    });
+    for (const folder of existing) {
+      await new Promise(resolve => chrome.bookmarks.removeTree(folder.id, resolve));
+    }
+
+    // Create fresh StartDock root folder in the bookmarks bar
+    const root = await new Promise(resolve => {
+      chrome.bookmarks.create({ parentId: '1', title: 'StartDock' }, resolve);
+    });
+
+    // Create one sub-folder per category with its bookmarks
+    for (const cat of data.categories) {
+      const catFolder = await new Promise(resolve => {
+        chrome.bookmarks.create({ parentId: root.id, title: cat.name }, resolve);
+      });
+      for (const bm of cat.bookmarks) {
+        await new Promise(resolve => {
+          chrome.bookmarks.create({ parentId: catFolder.id, title: bm.name, url: bm.url }, resolve);
+        });
+      }
+    }
+
+    btn.textContent = 'Exported!';
+    setTimeout(() => {
+      btn.textContent = '↗ Export to browser bookmarks';
+      btn.disabled = false;
+    }, 2000);
+  } catch (err) {
+    console.error('StartDock: export to browser failed', err);
+    btn.textContent = 'Export failed';
+    btn.disabled = false;
+  }
+}
+
 /* ── Import / Export ── */
 
 function initImportExport() {
@@ -422,6 +469,11 @@ function initImportExport() {
 
   document.getElementById('btn-import-trigger').addEventListener('click', () => {
     document.getElementById('import-file').click();
+  });
+
+  document.getElementById('btn-export-browser').addEventListener('click', () => {
+    if (!confirm(`This will replace the "StartDock" folder in your browser bookmarks bar with your current ${data.categories.length} categories. Continue?`)) return;
+    exportToBrowser();
   });
 
   document.getElementById('import-file').addEventListener('change', e => {
