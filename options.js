@@ -2,7 +2,7 @@
 
 const STORAGE_KEY = 'startdock';
 
-let data  = { categories: [] };
+let data  = { categories: [], settings: { dataSource: 'custom', nativeShowPath: false } };
 let dirty = false;
 
 /* ── Storage ── */
@@ -285,6 +285,48 @@ function attachCatEvents(block, ci) {
   });
 }
 
+/* ── Data Source ── */
+
+function applyDataSourceUI(source) {
+  const isNative = source === 'native';
+
+  document.querySelectorAll('.ds-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.source === source);
+  });
+
+  document.getElementById('ds-native-opts').classList.toggle('visible', isNative);
+  document.getElementById('custom-section-header').style.display = isNative ? 'none' : '';
+  document.getElementById('new-cat-form').style.display = 'none';
+  document.querySelector('#categories-list').style.display = isNative ? 'none' : '';
+  document.getElementById('io-section').style.display = isNative ? 'none' : '';
+  document.getElementById('btn-save').style.display = isNative ? 'none' : '';
+}
+
+function initDataSource() {
+  const settings = data.settings || {};
+  const current = settings.dataSource || 'custom';
+  applyDataSourceUI(current);
+  document.getElementById('native-show-path').checked = settings.nativeShowPath || false;
+
+  document.querySelectorAll('.ds-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const source = btn.dataset.source;
+      if (!data.settings) data.settings = {};
+      data.settings.dataSource = source;
+      applyDataSourceUI(source);
+      markDirty();
+      handleSave();
+    });
+  });
+
+  document.getElementById('native-show-path').addEventListener('change', e => {
+    if (!data.settings) data.settings = {};
+    data.settings.nativeShowPath = e.target.checked;
+    markDirty();
+    handleSave();
+  });
+}
+
 /* ── Add category ── */
 
 function initAddCategory() {
@@ -411,9 +453,13 @@ function initImportExport() {
 
 async function init() {
   const stored = await loadData();
-  if (stored) data = stored;
+  if (stored) {
+    data = stored;
+    if (!data.settings) data.settings = { dataSource: 'custom', nativeShowPath: false };
+  }
 
   renderCategories();
+  initDataSource();
   initAddCategory();
   initSaveButton();
   initQuickAdd();

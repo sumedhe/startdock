@@ -64,6 +64,71 @@ const DEFAULT_DATA = {
   ],
 };
 
+/* ── Native bookmark helpers ── */
+
+const CATEGORY_COLORS = [
+  '#3B82F6','#10B981','#F59E0B','#EF4444',
+  '#8B5CF6','#EC4899','#06B6D4','#64748B',
+];
+
+function flattenNode(node, pathParts, showPath) {
+  const bookmarks = [];
+  if (!node.children) return bookmarks;
+  for (const child of node.children) {
+    if (child.url) {
+      const name = showPath && pathParts.length > 0
+        ? pathParts.join(' / ') + ' / ' + (child.title || child.url)
+        : (child.title || child.url);
+      bookmarks.push({ name, url: child.url });
+    } else {
+      bookmarks.push(...flattenNode(child, [...pathParts, child.title], showPath));
+    }
+  }
+  return bookmarks;
+}
+
+function nativeBookmarksToCategories(tree, showPath) {
+  const categories = [];
+  let colorIdx = 0;
+
+  function processRoot(rootNode) {
+    if (!rootNode.children) return;
+    const directBookmarks = rootNode.children
+      .filter(c => c.url)
+      .map(c => ({ name: c.title || c.url, url: c.url }));
+    if (directBookmarks.length > 0) {
+      categories.push({
+        name: rootNode.title,
+        color: CATEGORY_COLORS[colorIdx++ % CATEGORY_COLORS.length],
+        bookmarks: directBookmarks,
+      });
+    }
+    rootNode.children.filter(c => !c.url).forEach(folder => {
+      const bookmarks = flattenNode(folder, [], showPath);
+      if (bookmarks.length > 0) {
+        categories.push({
+          name: folder.title || 'Folder',
+          color: CATEGORY_COLORS[colorIdx++ % CATEGORY_COLORS.length],
+          bookmarks,
+        });
+      }
+    });
+  }
+
+  if (tree[0] && tree[0].children) {
+    tree[0].children.forEach(processRoot);
+  }
+  return categories;
+}
+
+function loadNativeBookmarks(showPath) {
+  return new Promise(resolve => {
+    chrome.bookmarks.getTree(tree => {
+      resolve(nativeBookmarksToCategories(tree, showPath));
+    });
+  });
+}
+
 /* ── Utilities ── */
 
 function hexToRgb(hex) {
@@ -282,7 +347,14 @@ function initSettings() {
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'sync' && changes[STORAGE_KEY]) {
     const data = changes[STORAGE_KEY].newValue;
-    if (data) {
+    if (!data) return;
+    const settings = data.settings || {};
+    if (settings.dataSource === 'native') {
+      loadNativeBookmarks(settings.nativeShowPath || false).then(categories => {
+        renderGrid(categories);
+        updateStats(categories);
+      });
+    } else {
       renderGrid(data.categories);
       updateStats(data.categories);
     }
@@ -297,8 +369,17 @@ async function init() {
     data = DEFAULT_DATA;
     await saveData(data);
   }
-  renderGrid(data.categories);
-  updateStats(data.categories);
+
+  const settings = data.settings || {};
+  let categories;
+  if (settings.dataSource === 'native') {
+    categories = await loadNativeBookmarks(settings.nativeShowPath || false);
+  } else {
+    categories = data.categories;
+  }
+
+  renderGrid(categories);
+  updateStats(categories);
   initClock();
   initCalendar();
   initSearch();

@@ -5,7 +5,7 @@
   "description": "Your personal new tab dashboard with organised bookmarks",
   "chrome_url_overrides": { "newtab": "newtab.html" },
   "options_ui": { "page": "options.html", "open_in_tab": true },
-  "permissions": ["storage", "contextMenus"],
+  "permissions": ["storage", "contextMenus", "bookmarks"],
   "background": { "service_worker": "background.js" },
   "action": {
     "default_title": "StartDock Settings",

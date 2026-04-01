@@ -371,6 +371,91 @@
     }
 
     #import-file { display: none; }
+
+    /* ── Data Source section ── */
+    .ds-section {
+      margin-bottom: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+    }
+
+    .ds-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 14px;
+    }
+
+    .ds-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .ds-option {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: none;
+      color: var(--text-sub);
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .ds-option:hover {
+      border-color: rgba(255,255,255,0.2);
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .ds-option.active {
+      background: rgba(59,130,246,0.15);
+      border-color: rgba(59,130,246,0.4);
+      color: #93c5fd;
+      font-weight: 500;
+    }
+
+    .ds-native-opts {
+      display: none;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .ds-native-opts.visible { display: block; }
+
+    .ds-native-notice {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-row input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+      accent-color: var(--blue);
+    }
+
+    .toggle-row span { font-size: 13px; color: var(--text); }
   </style>
 </head>
 <body>
@@ -414,8 +499,24 @@
   </div>
 
   <div class="content">
+    <!-- Data Source -->
+    <div class="ds-section">
+      <div class="ds-title">Data Source</div>
+      <div class="ds-toggle">
+        <button class="ds-option active" data-source="custom">Custom bookmarks</button>
+        <button class="ds-option" data-source="native">Browser bookmarks</button>
+      </div>
+      <div class="ds-native-opts" id="ds-native-opts">
+        <p class="ds-native-notice">Displaying your browser's native bookmarks (read-only). To add, edit, or delete bookmarks, use Chrome's bookmark manager.</p>
+        <label class="toggle-row">
+          <input type="checkbox" id="native-show-path">
+          <span>Show folder path in bookmark names</span>
+        </label>
+      </div>
+    </div>
+
     <!-- Section header -->
-    <div class="section-header">
+    <div class="section-header" id="custom-section-header">
       <span class="section-title">Categories</span>
       <button class="btn btn-ghost" id="btn-add-cat">&#43; Add category</button>
     </div>
@@ -440,7 +541,7 @@
     <div id="categories-list"></div>
 
     <!-- Import / Export -->
-    <div class="io-section">
+    <div class="io-section" id="io-section">
       <div class="io-title">Import &amp; Export</div>
       <div class="io-row">
         <button class="btn btn-ghost" id="btn-export">&#8595; Export JSON</button>
