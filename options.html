@@ -308,6 +308,21 @@
       padding: 8px 14px;
     }
 
+    /* ── Drag to reorder ── */
+    .bm-drag {
+      color: var(--text-muted);
+      cursor: grab;
+      padding: 0 2px;
+      font-size: 15px;
+      flex-shrink: 0;
+      opacity: 0.3;
+      user-select: none;
+      line-height: 1;
+    }
+    .bm-row:hover .bm-drag { opacity: 0.6; }
+    .bm-row.dragging { opacity: 0.35; }
+    .bm-row.drag-over { background: rgba(59,130,246,0.08); box-shadow: inset 0 2px 0 rgba(59,130,246,0.35); }
+
     /* ── Inputs ── */
     input[type="text"],
     input[type="url"],

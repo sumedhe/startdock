@@ -112,12 +112,16 @@ function renderBookmarks(block, cat, ci) {
   const body = block.querySelector('.cat-body');
   body.innerHTML = '';
 
+  let dragSrcBi = null;
+
   cat.bookmarks.forEach((bm, bi) => {
     /* Display row */
     const row = document.createElement('div');
     row.className = 'bm-row';
     row.dataset.bi = bi;
+    row.draggable = true;
     row.innerHTML = `
+      <span class="bm-drag" title="Drag to reorder">&#8942;</span>
       <img class="bm-favicon" src="${faviconUrl(bm.url)}" alt="" loading="lazy" onerror="this.style.display='none'">
       <span class="bm-name" title="${escHtml(bm.name)}">${escHtml(bm.name)}</span>
       <span class="bm-url" title="${escHtml(bm.url)}">${escHtml(bm.url)}</span>
@@ -126,6 +130,35 @@ function renderBookmarks(block, cat, ci) {
         <button class="btn-icon danger" data-action="del-bm" data-ci="${ci}" data-bi="${bi}" title="Delete">&#10005;</button>
       </div>
     `;
+
+    /* Drag-to-reorder events */
+    row.addEventListener('dragstart', e => {
+      dragSrcBi = bi;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => row.classList.add('dragging'), 0);
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('dragging');
+      body.querySelectorAll('.bm-row').forEach(r => r.classList.remove('drag-over'));
+      dragSrcBi = null;
+    });
+    row.addEventListener('dragover', e => {
+      if (dragSrcBi === null || dragSrcBi === bi) return;
+      e.preventDefault();
+      body.querySelectorAll('.bm-row').forEach(r => r.classList.remove('drag-over'));
+      row.classList.add('drag-over');
+    });
+    row.addEventListener('drop', e => {
+      e.preventDefault();
+      if (dragSrcBi === null || dragSrcBi === bi) return;
+      const moved = data.categories[ci].bookmarks.splice(dragSrcBi, 1)[0];
+      data.categories[ci].bookmarks.splice(bi, 0, moved);
+      dragSrcBi = null;
+      markDirty();
+      renderCategories();
+      const newBlock = document.querySelector(`.cat-block[data-ci="${ci}"]`);
+      if (newBlock) newBlock.classList.add('open');
+    });
 
     /* Edit form (hidden) */
     const editRow = document.createElement('div');
