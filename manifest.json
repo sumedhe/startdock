@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "StartDock",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Your personal new tab dashboard with organised bookmarks",
   "chrome_url_overrides": { "newtab": "newtab.html" },
   "options_ui": { "page": "options.html", "open_in_tab": true },

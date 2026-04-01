@@ -76,12 +76,14 @@ function flattenNode(node, pathParts, showPath) {
   if (!node.children) return bookmarks;
   for (const child of node.children) {
     if (child.url) {
-      const name = showPath && pathParts.length > 0
-        ? pathParts.join(' / ') + ' / ' + (child.title || child.url)
+      const pathLabel = pathParts.filter(Boolean).join(' / ');
+      const name = showPath && pathLabel
+        ? pathLabel + ' / ' + (child.title || child.url)
         : (child.title || child.url);
       bookmarks.push({ name, url: child.url });
     } else {
-      bookmarks.push(...flattenNode(child, [...pathParts, child.title], showPath));
+      const nextPath = child.title ? [...pathParts, child.title] : pathParts;
+      bookmarks.push(...flattenNode(child, nextPath, showPath));
     }
   }
   return bookmarks;
@@ -123,7 +125,9 @@ function nativeBookmarksToCategories(tree, showPath) {
 
 function loadNativeBookmarks(showPath) {
   return new Promise(resolve => {
+    if (!chrome.bookmarks) { resolve(null); return; }
     chrome.bookmarks.getTree(tree => {
+      if (chrome.runtime.lastError || !tree) { resolve(null); return; }
       resolve(nativeBookmarksToCategories(tree, showPath));
     });
   });
@@ -350,7 +354,8 @@ chrome.storage.onChanged.addListener((changes, area) => {
     if (!data) return;
     const settings = data.settings || {};
     if (settings.dataSource === 'native') {
-      loadNativeBookmarks(settings.nativeShowPath || false).then(categories => {
+      loadNativeBookmarks(settings.nativeShowPath || false).then(nativeCategories => {
+        const categories = nativeCategories !== null ? nativeCategories : data.categories;
         renderGrid(categories);
         updateStats(categories);
       });
@@ -373,7 +378,8 @@ async function init() {
   const settings = data.settings || {};
   let categories;
   if (settings.dataSource === 'native') {
-    categories = await loadNativeBookmarks(settings.nativeShowPath || false);
+    const nativeCategories = await loadNativeBookmarks(settings.nativeShowPath || false);
+    categories = nativeCategories !== null ? nativeCategories : data.categories;
   } else {
     categories = data.categories;
   }
