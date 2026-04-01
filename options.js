@@ -473,6 +473,7 @@ function initAddCategory() {
 
 function initSaveButton() {
   document.getElementById('btn-save').addEventListener('click', handleSave);
+  document.getElementById('btn-close').addEventListener('click', () => window.close());
 }
 
 /* ── Quick-add (via context menu) ── */
