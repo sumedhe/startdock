@@ -247,12 +247,29 @@ function renderBookmarks(block, cat, ci) {
       <span class="bm-name" title="${escHtml(bm.name)}">${escHtml(bm.name)}</span>
       <span class="bm-url" title="${escHtml(bm.url)}">${escHtml(bm.url)}</span>
       <div class="bm-actions">
+        <button class="btn-icon" data-action="move-bm" data-ci="${ci}" data-bi="${bi}" title="Move to category">&#8594;</button>
         <button class="btn-icon" data-action="edit-bm" data-ci="${ci}" data-bi="${bi}" title="Edit">&#9998;</button>
         <button class="btn-icon danger" data-action="del-bm" data-ci="${ci}" data-bi="${bi}" title="Delete">&#10005;</button>
       </div>
     `;
 
     attachDragEvents(row, bi);
+
+    /* Move form (hidden) */
+    const moveRow = document.createElement('div');
+    moveRow.className = 'bm-edit-form';
+    moveRow.dataset.biMove = bi;
+    const catOptions = data.categories
+      .map((c, i) => i === ci ? '' : `<option value="${i}">${escHtml(c.name)}</option>`)
+      .join('');
+    moveRow.innerHTML = `
+      <div class="field">
+        <label>Move to</label>
+        <select class="bm-move-select">${catOptions}</select>
+      </div>
+      <button class="btn btn-primary bm-move-confirm" data-ci="${ci}" data-bi="${bi}">Move</button>
+      <button class="btn btn-ghost bm-move-cancel" data-bi="${bi}">Cancel</button>
+    `;
 
     /* Edit form (hidden) */
     const editRow = document.createElement('div');
@@ -272,6 +289,7 @@ function renderBookmarks(block, cat, ci) {
     `;
 
     body.appendChild(row);
+    body.appendChild(moveRow);
     body.appendChild(editRow);
   });
 
@@ -342,6 +360,41 @@ function attachCatEvents(block, ci) {
     renderCategories();
   });
 
+  /* Bookmark move */
+  block.querySelectorAll('[data-action="move-bm"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const bi = parseInt(btn.dataset.bi);
+      const row  = block.querySelector(`.bm-row[data-bi="${bi}"]`);
+      const form = block.querySelector(`.bm-edit-form[data-bi-move="${bi}"]`);
+      row.style.display = 'none';
+      form.classList.add('active');
+    });
+  });
+
+  block.querySelectorAll('.bm-move-confirm').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const bi      = parseInt(btn.dataset.bi);
+      const form    = block.querySelector(`.bm-edit-form[data-bi-move="${bi}"]`);
+      const toCi    = parseInt(form.querySelector('.bm-move-select').value);
+      const [moved] = data.categories[ci].bookmarks.splice(bi, 1);
+      data.categories[toCi].bookmarks.push(moved);
+      markDirty();
+      renderCategories();
+      const newBlock = document.querySelector(`.cat-block[data-ci="${ci}"]`);
+      if (newBlock) newBlock.classList.add('open');
+    });
+  });
+
+  block.querySelectorAll('.bm-move-cancel').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const bi  = parseInt(btn.dataset.bi);
+      const row  = block.querySelector(`.bm-row[data-bi="${bi}"]`);
+      const form = block.querySelector(`.bm-edit-form[data-bi-move="${bi}"]`);
+      row.style.display = '';
+      form.classList.remove('active');
+    });
+  });
+
   /* Bookmark edit / delete */
   block.querySelectorAll('[data-action="edit-bm"]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -356,7 +409,8 @@ function attachCatEvents(block, ci) {
   block.querySelectorAll('[data-action="del-bm"]').forEach(btn => {
     btn.addEventListener('click', () => {
       const bi = parseInt(btn.dataset.bi);
-      if (!confirm(`Delete "${data.categories[ci].bookmarks[bi].name}"?`)) return;
+      const bm = data.categories[ci].bookmarks[bi];
+      if (!confirm(bm.type === 'separator' ? 'Delete this section?' : `Delete "${bm.name}"?`)) return;
       data.categories[ci].bookmarks.splice(bi, 1);
       markDirty();
       renderCategories();
