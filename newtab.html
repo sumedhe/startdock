@@ -387,6 +387,31 @@
       flex-shrink: 0;
     }
 
+    .bookmark-separator--labeled {
+      height: auto;
+      background: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 4px 8px;
+    }
+
+    .bookmark-separator--labeled::before,
+    .bookmark-separator--labeled::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+    }
+
+    .bookmark-separator--labeled span {
+      font-size: 9px;
+      color: rgba(255,255,255,0.25);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+    }
+
     .bookmark-name {
       font-size: 13px;
       white-space: nowrap;

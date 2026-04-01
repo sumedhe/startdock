@@ -194,15 +194,43 @@ function renderBookmarks(block, cat, ci) {
       row.className = 'bm-separator-row';
       row.dataset.bi = bi;
       row.draggable = true;
+      const labelText = bm.label || '';
       row.innerHTML = `
         <span class="bm-drag" title="Drag to reorder">&#8942;</span>
         <div class="bm-separator-line"></div>
-        <span class="bm-separator-label">separator</span>
+        <span class="bm-separator-label" title="Click to edit label">${escHtml(labelText) || 'section'}</span>
+        <input class="bm-separator-input" type="text" value="${escHtml(labelText)}" placeholder="Label (optional)" style="display:none">
         <div class="bm-separator-line"></div>
         <div class="bm-actions">
           <button class="btn-icon danger" data-action="del-bm" data-ci="${ci}" data-bi="${bi}" title="Delete">&#10005;</button>
         </div>
       `;
+
+      const labelEl = row.querySelector('.bm-separator-label');
+      const inputEl = row.querySelector('.bm-separator-input');
+
+      labelEl.addEventListener('click', () => {
+        labelEl.style.display = 'none';
+        inputEl.style.display = '';
+        inputEl.focus();
+        inputEl.select();
+      });
+
+      const commitLabel = () => {
+        const val = inputEl.value.trim();
+        data.categories[ci].bookmarks[bi].label = val;
+        markDirty();
+        labelEl.textContent = val || 'section';
+        inputEl.style.display = 'none';
+        labelEl.style.display = '';
+      };
+
+      inputEl.addEventListener('blur', commitLabel);
+      inputEl.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); commitLabel(); }
+        if (e.key === 'Escape') { inputEl.value = bm.label || ''; commitLabel(); }
+      });
+
       attachDragEvents(row, bi);
       body.appendChild(row);
       return;
@@ -252,7 +280,7 @@ function renderBookmarks(block, cat, ci) {
   addRow.className = 'add-bm-row';
   addRow.innerHTML = `
     <button class="btn btn-ghost" data-action="add-bm" data-ci="${ci}" style="font-size:12px; padding:5px 10px;">&#43; Add bookmark</button>
-    <button class="btn btn-ghost" data-action="add-sep" data-ci="${ci}" style="font-size:12px; padding:5px 10px;">&#8213; Add separator</button>
+    <button class="btn btn-ghost" data-action="add-sep" data-ci="${ci}" style="font-size:12px; padding:5px 10px;">&#8213; Add section</button>
   `;
 
   /* New bookmark form */

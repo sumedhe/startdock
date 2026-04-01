@@ -201,9 +201,13 @@ function buildColumn(cat, index) {
 
 function buildBookmark(bm) {
   if (bm.type === 'separator') {
-    const hr = document.createElement('div');
-    hr.className = 'bookmark-separator';
-    return hr;
+    const wrap = document.createElement('div');
+    wrap.className = 'bookmark-separator';
+    if (bm.label) {
+      wrap.classList.add('bookmark-separator--labeled');
+      wrap.innerHTML = `<span>${escHtml(bm.label)}</span>`;
+    }
+    return wrap;
   }
   const a = document.createElement('a');
   a.className = 'bookmark-item';
