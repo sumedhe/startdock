@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StartDock Settings</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0b0d14;
+      --surface: #13151f;
+      --surface2: #1a1d2e;
+      --border: rgba(255,255,255,0.06);
+      --border2: rgba(255,255,255,0.1);
+      --text: #e2e8f0;
+      --text-muted: #4a5568;
+      --text-sub: #718096;
+      --blue: #3B82F6;
+      --radius: 10px;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Header ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 100;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      width: 22px; height: 22px;
+    }
+
+    .logo-grid span {
+      border-radius: 2px;
+      display: block;
+    }
+
+    .topbar h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .save-status {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+
+    .save-status.saved { color: #10B981; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .btn-primary:hover { background: #2563eb; }
+
+    .btn-ghost {
+      background: none;
+      color: var(--text-sub);
+      border: 1px solid var(--border2);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .btn-danger {
+      background: none;
+      color: #f87171;
+      border: 1px solid rgba(248,113,113,0.2);
+    }
+
+    .btn-danger:hover {
+      background: rgba(248,113,113,0.08);
+      border-color: rgba(248,113,113,0.4);
+    }
+
+    .btn-icon {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 5px;
+      font-size: 13px;
+      line-height: 1;
+      transition: color 0.12s, background 0.12s;
+    }
+
+    .btn-icon:hover { color: var(--text); background: rgba(255,255,255,0.07); }
+    .btn-icon.danger:hover { color: #f87171; background: rgba(248,113,113,0.08); }
+
+    /* ── Quick-add banner ── */
+    #quick-add-banner {
+      display: none;
+      margin: 20px 40px 0;
+      background: rgba(59,130,246,0.08);
+      border: 1px solid rgba(59,130,246,0.25);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    #quick-add-banner .banner-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #93c5fd;
+      margin-bottom: 10px;
+    }
+
+    #quick-add-banner .banner-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    #quick-add-banner .field { display: flex; flex-direction: column; gap: 4px; }
+    #quick-add-banner .field label { font-size: 11px; color: var(--text-sub); }
+    #quick-add-banner .field input,
+    #quick-add-banner .field select { min-width: 180px; }
+
+    /* ── Main content ── */
+    .content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 40px 80px;
+    }
+
+    /* ── Section header ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Category blocks ── */
+    .cat-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .cat-header-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.12s;
+    }
+
+    .cat-header-row:hover { background: rgba(255,255,255,0.02); }
+
+    .cat-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .cat-name-label {
+      font-size: 13px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .cat-count-badge {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.05);
+      border-radius: 99px;
+      padding: 1px 8px;
+    }
+
+    .cat-chevron {
+      color: var(--text-muted);
+      font-size: 11px;
+      transition: transform 0.2s;
+    }
+
+    .cat-block.open .cat-chevron { transform: rotate(180deg); }
+
+    /* ── Category edit form ── */
+    .cat-edit-form {
+      display: none;
+      padding: 12px 14px;
+      border-top: 1px solid var(--border);
+      background: rgba(255,255,255,0.01);
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+
+    .cat-block.editing .cat-edit-form { display: flex; }
+    .cat-block.editing .cat-header-row { cursor: default; }
+    .cat-block.editing .cat-header-row:hover { background: none; }
+
+    /* ── Category body ── */
+    .cat-body {
+      display: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .cat-block.open .cat-body { display: block; }
+    .cat-block.editing .cat-body { display: none; }
+
+    /* ── Bookmark rows ── */
+    .bm-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+
+    .bm-row:last-child { border-bottom: none; }
+    .bm-row:hover { background: rgba(255,255,255,0.02); }
+
+    .bm-favicon {
+      width: 14px; height: 14px;
+      border-radius: 3px;
+      object-fit: contain;
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    .bm-name { font-size: 13px; flex: 0 0 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bm-url  { font-size: 11px; color: var(--text-muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bm-actions { display: flex; gap: 2px; flex-shrink: 0; }
+
+    /* ── Bookmark edit form ── */
+    .bm-edit-form {
+      display: none;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      background: rgba(255,255,255,0.01);
+    }
+
+    .bm-edit-form.active { display: flex; }
+
+    /* ── Add bookmark row ── */
+    .add-bm-row {
+      padding: 8px 14px;
+    }
+
+    /* ── Inputs ── */
+    input[type="text"],
+    input[type="url"],
+    select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      padding: 6px 10px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input[type="text"]:focus,
+    input[type="url"]:focus,
+    select:focus {
+      border-color: rgba(59,130,246,0.5);
+      box-shadow: 0 0 0 2px rgba(59,130,246,0.08);
+    }
+
+    input[type="color"] {
+      width: 32px; height: 32px;
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      cursor: pointer;
+      background: none;
+      padding: 2px;
+    }
+
+    select option { background: #1a1d2e; }
+
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 11px; color: var(--text-sub); }
+    .field-row { display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; }
+
+    /* ── Import / Export ── */
+    .io-section {
+      margin-top: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+    }
+
+    .io-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+    }
+
+    .io-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    #import-file { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky top bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo-grid">
+        <span style="background:#3B82F6"></span>
+        <span style="background:#8B5CF6"></span>
+        <span style="background:#10B981"></span>
+        <span style="background:#EC4899"></span>
+      </div>
+      <h1>StartDock</h1>
+    </div>
+    <div class="topbar-right">
+      <span class="save-status" id="save-status"></span>
+      <button class="btn btn-primary" id="btn-save">Save changes</button>
+    </div>
+  </div>
+
+  <!-- Quick-add banner (shown when opened via context menu) -->
+  <div id="quick-add-banner">
+    <div class="banner-title">&#43; Quick add bookmark</div>
+    <div class="banner-form">
+      <div class="field">
+        <label>Name</label>
+        <input type="text" id="qa-name" placeholder="Page name">
+      </div>
+      <div class="field">
+        <label>URL</label>
+        <input type="url" id="qa-url" placeholder="https://…">
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <select id="qa-category"></select>
+      </div>
+      <button class="btn btn-primary" id="qa-add">Add</button>
+      <button class="btn btn-ghost" id="qa-cancel">Dismiss</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Section header -->
+    <div class="section-header">
+      <span class="section-title">Categories</span>
+      <button class="btn btn-ghost" id="btn-add-cat">&#43; Add category</button>
+    </div>
+
+    <!-- New category form (hidden by default) -->
+    <div id="new-cat-form" style="display:none; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:10px;">
+      <div class="field-row">
+        <div class="field">
+          <label>Category name</label>
+          <input type="text" id="new-cat-name" placeholder="e.g. Social Media">
+        </div>
+        <div class="field">
+          <label>Colour</label>
+          <input type="color" id="new-cat-color" value="#3B82F6">
+        </div>
+        <button class="btn btn-primary" id="new-cat-save">Add</button>
+        <button class="btn btn-ghost" id="new-cat-cancel">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Categories list -->
+    <div id="categories-list"></div>
+
+    <!-- Import / Export -->
+    <div class="io-section">
+      <div class="io-title">Import &amp; Export</div>
+      <div class="io-row">
+        <button class="btn btn-ghost" id="btn-export">&#8595; Export JSON</button>
+        <button class="btn btn-ghost" id="btn-import-trigger">&#8593; Import JSON</button>
+        <input type="file" id="import-file" accept=".json">
+      </div>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
