@@ -501,7 +501,9 @@ function initAddCategory() {
 
 function initSaveButton() {
   document.getElementById('btn-save').addEventListener('click', handleSave);
-  document.getElementById('btn-close').addEventListener('click', () => window.close());
+  document.getElementById('btn-close').addEventListener('click', () => {
+    location.href = chrome.runtime.getURL('newtab.html');
+  });
 }
 
 /* ── Quick-add (via context menu) ── */
