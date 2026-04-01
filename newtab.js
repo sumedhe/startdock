@@ -183,10 +183,11 @@ function buildColumn(cat, index) {
 
   const header = document.createElement('div');
   header.className = 'column-header';
+  const bmCount = cat.bookmarks.filter(bm => bm.type !== 'separator').length;
   header.innerHTML = `
     <span class="column-dot"></span>
     <h2 class="column-title">${escHtml(cat.name)}</h2>
-    <span class="column-count">${cat.bookmarks.length}</span>
+    <span class="column-count">${bmCount}</span>
   `;
 
   const list = document.createElement('div');
@@ -199,6 +200,11 @@ function buildColumn(cat, index) {
 }
 
 function buildBookmark(bm) {
+  if (bm.type === 'separator') {
+    const hr = document.createElement('div');
+    hr.className = 'bookmark-separator';
+    return hr;
+  }
   const a = document.createElement('a');
   a.className = 'bookmark-item';
   a.href = bm.url;
@@ -214,7 +220,7 @@ function escHtml(str) {
 }
 
 function updateStats(categories) {
-  const total = categories.reduce((s, c) => s + c.bookmarks.length, 0);
+  const total = categories.reduce((s, c) => s + c.bookmarks.filter(bm => bm.type !== 'separator').length, 0);
   document.getElementById('bookmark-total').textContent = total;
   document.getElementById('category-total').textContent = categories.length;
 }

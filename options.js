@@ -116,7 +116,7 @@ function buildCatBlock(cat, ci) {
       <span class="cat-drag" title="Drag to reorder">&#8942;</span>
       <span class="cat-dot" style="background:${escHtml(cat.color)}"></span>
       <span class="cat-name-label">${escHtml(cat.name)}</span>
-      <span class="cat-count-badge">${cat.bookmarks.length}</span>
+      <span class="cat-count-badge">${cat.bookmarks.filter(b => b.type !== 'separator').length}</span>
       <button class="btn-icon" data-action="edit-cat" title="Edit category">&#9998;</button>
       <button class="btn-icon danger" data-action="del-cat" title="Delete category">&#10005;</button>
       <span class="cat-chevron">&#9660;</span>
@@ -151,7 +151,63 @@ function renderBookmarks(block, cat, ci) {
 
   let dragSrcBi = null;
 
+  const clearDragOver = () => body.querySelectorAll('.bm-row, .bm-separator-row').forEach(r => r.classList.remove('drag-over'));
+
+  const attachDragEvents = (row, bi) => {
+    row.addEventListener('dragstart', e => {
+      e.stopPropagation();
+      dragSrcBi = bi;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => row.classList.add('dragging'), 0);
+    });
+    row.addEventListener('dragend', e => {
+      e.stopPropagation();
+      row.classList.remove('dragging');
+      clearDragOver();
+      dragSrcBi = null;
+    });
+    row.addEventListener('dragover', e => {
+      e.stopPropagation();
+      if (dragSrcBi === null || dragSrcBi === bi) return;
+      e.preventDefault();
+      clearDragOver();
+      row.classList.add('drag-over');
+    });
+    row.addEventListener('drop', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (dragSrcBi === null || dragSrcBi === bi) return;
+      const moved = data.categories[ci].bookmarks.splice(dragSrcBi, 1)[0];
+      data.categories[ci].bookmarks.splice(bi, 0, moved);
+      dragSrcBi = null;
+      markDirty();
+      renderCategories();
+      const newBlock = document.querySelector(`.cat-block[data-ci="${ci}"]`);
+      if (newBlock) newBlock.classList.add('open');
+    });
+  };
+
   cat.bookmarks.forEach((bm, bi) => {
+    /* Separator row */
+    if (bm.type === 'separator') {
+      const row = document.createElement('div');
+      row.className = 'bm-separator-row';
+      row.dataset.bi = bi;
+      row.draggable = true;
+      row.innerHTML = `
+        <span class="bm-drag" title="Drag to reorder">&#8942;</span>
+        <div class="bm-separator-line"></div>
+        <span class="bm-separator-label">separator</span>
+        <div class="bm-separator-line"></div>
+        <div class="bm-actions">
+          <button class="btn-icon danger" data-action="del-bm" data-ci="${ci}" data-bi="${bi}" title="Delete">&#10005;</button>
+        </div>
+      `;
+      attachDragEvents(row, bi);
+      body.appendChild(row);
+      return;
+    }
+
     /* Display row */
     const row = document.createElement('div');
     row.className = 'bm-row';
@@ -168,38 +224,7 @@ function renderBookmarks(block, cat, ci) {
       </div>
     `;
 
-    /* Drag-to-reorder events */
-    row.addEventListener('dragstart', e => {
-      e.stopPropagation();
-      dragSrcBi = bi;
-      e.dataTransfer.effectAllowed = 'move';
-      setTimeout(() => row.classList.add('dragging'), 0);
-    });
-    row.addEventListener('dragend', e => {
-      e.stopPropagation();
-      row.classList.remove('dragging');
-      body.querySelectorAll('.bm-row').forEach(r => r.classList.remove('drag-over'));
-      dragSrcBi = null;
-    });
-    row.addEventListener('dragover', e => {
-      e.stopPropagation();
-      if (dragSrcBi === null || dragSrcBi === bi) return;
-      e.preventDefault();
-      body.querySelectorAll('.bm-row').forEach(r => r.classList.remove('drag-over'));
-      row.classList.add('drag-over');
-    });
-    row.addEventListener('drop', e => {
-      e.stopPropagation();
-      e.preventDefault();
-      if (dragSrcBi === null || dragSrcBi === bi) return;
-      const moved = data.categories[ci].bookmarks.splice(dragSrcBi, 1)[0];
-      data.categories[ci].bookmarks.splice(bi, 0, moved);
-      dragSrcBi = null;
-      markDirty();
-      renderCategories();
-      const newBlock = document.querySelector(`.cat-block[data-ci="${ci}"]`);
-      if (newBlock) newBlock.classList.add('open');
-    });
+    attachDragEvents(row, bi);
 
     /* Edit form (hidden) */
     const editRow = document.createElement('div');
@@ -225,7 +250,10 @@ function renderBookmarks(block, cat, ci) {
   /* Add bookmark row */
   const addRow = document.createElement('div');
   addRow.className = 'add-bm-row';
-  addRow.innerHTML = `<button class="btn btn-ghost" data-action="add-bm" data-ci="${ci}" style="font-size:12px; padding:5px 10px;">&#43; Add bookmark</button>`;
+  addRow.innerHTML = `
+    <button class="btn btn-ghost" data-action="add-bm" data-ci="${ci}" style="font-size:12px; padding:5px 10px;">&#43; Add bookmark</button>
+    <button class="btn btn-ghost" data-action="add-sep" data-ci="${ci}" style="font-size:12px; padding:5px 10px;">&#8213; Add separator</button>
+  `;
 
   /* New bookmark form */
   const newBmForm = document.createElement('div');
@@ -329,6 +357,15 @@ function attachCatEvents(block, ci) {
       row.style.display = '';
       form.classList.remove('active');
     });
+  });
+
+  /* Add separator */
+  block.querySelector('[data-action="add-sep"]').addEventListener('click', () => {
+    data.categories[ci].bookmarks.push({ type: 'separator' });
+    markDirty();
+    renderCategories();
+    const newBlock = document.querySelector(`.cat-block[data-ci="${ci}"]`);
+    if (newBlock) newBlock.classList.add('open');
   });
 
   /* Add bookmark */
