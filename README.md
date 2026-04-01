@@ -2,7 +2,7 @@
 
 A personal new-tab dashboard for Chrome that replaces the default new-tab page with an organised, fast-access bookmark grid.
 
-![StartDock screenshot](docs/screenshot.png)
+![StartDock screenshot](docs/screenshot.jpg)
 
 ## Features
 
