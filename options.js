@@ -63,8 +63,44 @@ function faviconUrl(url) {
 function renderCategories() {
   const container = document.getElementById('categories-list');
   container.innerHTML = '';
+  let dragSrcCi = null;
+
   data.categories.forEach((cat, ci) => {
-    container.appendChild(buildCatBlock(cat, ci));
+    const block = buildCatBlock(cat, ci);
+    block.draggable = true;
+    let dragHandleActive = false;
+
+    block.querySelector('.cat-drag').addEventListener('mousedown', () => { dragHandleActive = true; });
+    document.addEventListener('mouseup', () => { dragHandleActive = false; }, { once: false });
+
+    block.addEventListener('dragstart', e => {
+      if (!dragHandleActive) { e.preventDefault(); return; }
+      dragSrcCi = ci;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => block.classList.add('dragging'), 0);
+    });
+    block.addEventListener('dragend', () => {
+      block.classList.remove('dragging');
+      container.querySelectorAll('.cat-block').forEach(b => b.classList.remove('drag-over'));
+      dragSrcCi = null;
+    });
+    block.addEventListener('dragover', e => {
+      if (dragSrcCi === null || dragSrcCi === ci) return;
+      e.preventDefault();
+      container.querySelectorAll('.cat-block').forEach(b => b.classList.remove('drag-over'));
+      block.classList.add('drag-over');
+    });
+    block.addEventListener('drop', e => {
+      e.preventDefault();
+      if (dragSrcCi === null || dragSrcCi === ci) return;
+      const moved = data.categories.splice(dragSrcCi, 1)[0];
+      data.categories.splice(ci, 0, moved);
+      dragSrcCi = null;
+      markDirty();
+      renderCategories();
+    });
+
+    container.appendChild(block);
   });
   populateQaSelect();
 }
@@ -77,6 +113,7 @@ function buildCatBlock(cat, ci) {
   /* ── Header row ── */
   block.innerHTML = `
     <div class="cat-header-row" data-action="toggle">
+      <span class="cat-drag" title="Drag to reorder">&#8942;</span>
       <span class="cat-dot" style="background:${escHtml(cat.color)}"></span>
       <span class="cat-name-label">${escHtml(cat.name)}</span>
       <span class="cat-count-badge">${cat.bookmarks.length}</span>
@@ -133,22 +170,26 @@ function renderBookmarks(block, cat, ci) {
 
     /* Drag-to-reorder events */
     row.addEventListener('dragstart', e => {
+      e.stopPropagation();
       dragSrcBi = bi;
       e.dataTransfer.effectAllowed = 'move';
       setTimeout(() => row.classList.add('dragging'), 0);
     });
-    row.addEventListener('dragend', () => {
+    row.addEventListener('dragend', e => {
+      e.stopPropagation();
       row.classList.remove('dragging');
       body.querySelectorAll('.bm-row').forEach(r => r.classList.remove('drag-over'));
       dragSrcBi = null;
     });
     row.addEventListener('dragover', e => {
+      e.stopPropagation();
       if (dragSrcBi === null || dragSrcBi === bi) return;
       e.preventDefault();
       body.querySelectorAll('.bm-row').forEach(r => r.classList.remove('drag-over'));
       row.classList.add('drag-over');
     });
     row.addEventListener('drop', e => {
+      e.stopPropagation();
       e.preventDefault();
       if (dragSrcBi === null || dragSrcBi === bi) return;
       const moved = data.categories[ci].bookmarks.splice(dragSrcBi, 1)[0];
@@ -210,7 +251,7 @@ function renderBookmarks(block, cat, ci) {
 function attachCatEvents(block, ci) {
   /* Toggle collapse */
   block.querySelector('[data-action="toggle"]').addEventListener('click', e => {
-    if (e.target.closest('button')) return;
+    if (e.target.closest('button') || e.target.closest('.cat-drag')) return;
     if (block.classList.contains('editing')) return;
     block.classList.toggle('open');
   });

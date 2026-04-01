@@ -309,7 +309,7 @@
     }
 
     /* ── Drag to reorder ── */
-    .bm-drag {
+    .bm-drag, .cat-drag {
       color: var(--text-muted);
       cursor: grab;
       padding: 0 2px;
@@ -320,8 +320,11 @@
       line-height: 1;
     }
     .bm-row:hover .bm-drag { opacity: 0.6; }
+    .cat-header-row:hover .cat-drag { opacity: 0.6; }
     .bm-row.dragging { opacity: 0.35; }
+    .cat-block.dragging { opacity: 0.35; }
     .bm-row.drag-over { background: rgba(59,130,246,0.08); box-shadow: inset 0 2px 0 rgba(59,130,246,0.35); }
+    .cat-block.drag-over { box-shadow: inset 0 3px 0 rgba(59,130,246,0.45); }
 
     /* ── Inputs ── */
     input[type="text"],
