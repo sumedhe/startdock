@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StartDock — Personal New Tab Dashboard</title>
+  <meta name="description" content="Replace Chrome's default new-tab page with an organised, fast-access bookmark grid. Categories, live search, clock, and cross-device sync." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="icon" type="image/png" sizes="128x128" href="icon128.png" />
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <img src="icon.svg" alt="StartDock icon" class="nav-logo-icon" />
+      StartDock
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#screenshots">Screenshots</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/sumedhe/startdock" target="_blank" rel="noopener" class="nav-github">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844a9.59 9.59 0 012.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-glow hero-glow-blue"></div>
+    <div class="hero-glow hero-glow-purple"></div>
+    <div class="hero-content">
+      <div class="badge">Chrome Extension</div>
+      <h1>Your new tab,<br /><span class="hero-accent">reimagined.</span></h1>
+      <p class="hero-sub">
+        StartDock replaces Chrome's default new-tab page with a clean, organised bookmark dashboard — complete with categories, live search, a clock, and cross-device sync.
+      </p>
+      <div class="hero-actions">
+        <a href="#install" class="btn btn-primary">Get Started</a>
+        <a href="https://github.com/sumedhe/startdock" target="_blank" rel="noopener" class="btn btn-ghost">View on GitHub</a>
+      </div>
+    </div>
+    <div class="hero-screenshot">
+      <img src="screenshot-1280x800.jpg" alt="StartDock dashboard screenshot" />
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="features">
+    <div class="section-label">Features</div>
+    <h2>Everything you need, nothing you don't.</h2>
+    <div class="features-grid">
+
+      <div class="feature-card" style="--accent: #10B981">
+        <div class="feature-icon" style="background: rgba(16,185,129,0.12); color: #10B981">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <h3>Organised Categories</h3>
+        <p>Group bookmarks into colour-coded categories. Drag, reorder, and customise each one to match your workflow.</p>
+      </div>
+
+      <div class="feature-card" style="--accent: #3B82F6">
+        <div class="feature-icon" style="background: rgba(59,130,246,0.12); color: #3B82F6">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </div>
+        <h3>Live Search</h3>
+        <p>Press <kbd>/</kbd> to instantly filter every bookmark across all categories. No mouse required.</p>
+      </div>
+
+      <div class="feature-card" style="--accent: #F59E0B">
+        <div class="feature-icon" style="background: rgba(245,158,11,0.12); color: #F59E0B">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Clock &amp; Calendar</h3>
+        <p>A live clock with a personalised greeting and a mini monthly calendar — always in view on every new tab.</p>
+      </div>
+
+      <div class="feature-card" style="--accent: #8B5CF6">
+        <div class="feature-icon" style="background: rgba(139,92,246,0.12); color: #8B5CF6">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+        <h3>Sync Across Devices</h3>
+        <p>All data is stored in <code>chrome.storage.sync</code> — your bookmarks follow you across every Chrome installation.</p>
+      </div>
+
+      <div class="feature-card" style="--accent: #EC4899">
+        <div class="feature-icon" style="background: rgba(236,72,153,0.12); color: #EC4899">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        </div>
+        <h3>Import &amp; Export</h3>
+        <p>Back up your entire bookmark set as JSON and restore it anytime. Migrating to a new machine takes seconds.</p>
+      </div>
+
+      <div class="feature-card" style="--accent: #06B6D4">
+        <div class="feature-icon" style="background: rgba(6,182,212,0.12); color: #06B6D4">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </div>
+        <h3>Quick-Add via Context Menu</h3>
+        <p>Right-click any page and add it directly to a category — no need to open settings.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Screenshots -->
+  <section id="screenshots" class="screenshots">
+    <div class="section-label">Preview</div>
+    <h2>See it in action.</h2>
+    <div class="screenshots-grid">
+      <img src="screenshot-1.jpg" alt="StartDock bookmark dashboard" class="ss-main" />
+      <img src="screenshot-2.jpg" alt="StartDock settings page" class="ss-secondary" />
+    </div>
+  </section>
+
+  <!-- Install -->
+  <section id="install" class="install">
+    <div class="section-label">Installation</div>
+    <h2>Up and running in minutes.</h2>
+    <div class="install-grid">
+
+      <div class="install-card">
+        <div class="install-badge">Chrome Web Store</div>
+        <p class="install-sub">One-click install — coming soon.</p>
+        <a class="btn btn-primary btn-disabled" aria-disabled="true">Coming Soon</a>
+      </div>
+
+      <div class="install-divider"><span>or</span></div>
+
+      <div class="install-steps">
+        <div class="install-badge">Developer Mode</div>
+        <ol>
+          <li>
+            <span class="step-num">1</span>
+            <div>
+              <strong>Clone the repo</strong>
+              <code class="code-block">git clone https://github.com/sumedhe/startdock.git</code>
+            </div>
+          </li>
+          <li>
+            <span class="step-num">2</span>
+            <div>
+              <strong>Open Extensions</strong>
+              <span>Go to <code>chrome://extensions</code> and enable <em>Developer mode</em></span>
+            </div>
+          </li>
+          <li>
+            <span class="step-num">3</span>
+            <div>
+              <strong>Load unpacked</strong>
+              <span>Click <em>Load unpacked</em> and select the cloned folder</span>
+            </div>
+          </li>
+          <li>
+            <span class="step-num">4</span>
+            <div>
+              <strong>Open a new tab</strong>
+              <span>StartDock will appear immediately</span>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-logo">StartDock</span>
+      <span class="footer-meta">MIT License &middot; Built by <a href="https://github.com/sumedhe" target="_blank" rel="noopener">sumedhe</a></span>
+      <a href="https://github.com/sumedhe/startdock" target="_blank" rel="noopener" class="footer-gh">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844a9.59 9.59 0 012.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </footer>
+
+</body>
+</html>
