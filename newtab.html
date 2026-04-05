@@ -420,6 +420,43 @@
       text-overflow: ellipsis;
     }
 
+    .col-expand-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      width: 100%;
+      padding: 6px 8px;
+      background: none;
+      border: none;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: color 0.12s, background 0.12s;
+    }
+
+    .col-expand-btn:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .col-expand-icon {
+      width: 8px; height: 8px;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      transform: rotate(45deg);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+      margin-bottom: 2px;
+    }
+
+    .col-expand-btn.expanded .col-expand-icon {
+      transform: rotate(-135deg);
+      margin-bottom: -2px;
+    }
+
     .no-results {
       padding: 0 40px 12px;
       color: var(--text-muted);

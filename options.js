@@ -500,6 +500,8 @@ function initDataSource() {
   const current = settings.dataSource || 'custom';
   applyDataSourceUI(current);
   document.getElementById('native-show-path').checked = settings.nativeShowPath || false;
+  const maxInput = document.getElementById('max-visible');
+  maxInput.value = settings.maxVisible != null ? settings.maxVisible : '';
 
   document.querySelectorAll('.ds-option').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -515,6 +517,15 @@ function initDataSource() {
   document.getElementById('native-show-path').addEventListener('change', e => {
     if (!data.settings) data.settings = {};
     data.settings.nativeShowPath = e.target.checked;
+    markDirty();
+    handleSave();
+  });
+
+  document.getElementById('max-visible').addEventListener('change', e => {
+    if (!data.settings) data.settings = {};
+    const val = parseInt(e.target.value, 10);
+    data.settings.maxVisible = (isNaN(val) || val < 1) ? null : val;
+    e.target.value = data.settings.maxVisible != null ? data.settings.maxVisible : '';
     markDirty();
     handleSave();
   });

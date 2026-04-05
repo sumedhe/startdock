@@ -359,6 +359,7 @@
     /* ── Inputs ── */
     input[type="text"],
     input[type="url"],
+    input[type="number"],
     select {
       background: rgba(255,255,255,0.05);
       border: 1px solid var(--border2);
@@ -373,6 +374,7 @@
 
     input[type="text"]:focus,
     input[type="url"]:focus,
+    input[type="number"]:focus,
     select:focus {
       border-color: rgba(59,130,246,0.5);
       box-shadow: 0 0 0 2px rgba(59,130,246,0.08);
@@ -561,6 +563,10 @@
           <input type="checkbox" id="native-show-path">
           <span>Show folder path in bookmark names</span>
         </label>
+      </div>
+      <div style="margin-top:12px; display:flex; align-items:center; justify-content:space-between;">
+        <label for="max-visible" style="font-size:13px; color:var(--text);">Max bookmarks per category</label>
+        <input type="number" id="max-visible" min="1" max="100" step="1" placeholder="All" style="width:72px; text-align:center;">
       </div>
     </div>
 

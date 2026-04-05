@@ -167,15 +167,15 @@ function saveData(data) {
 
 /* ── Render ── */
 
-function renderGrid(categories) {
+function renderGrid(categories, maxVisible) {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
   categories.forEach((cat, i) => {
-    grid.appendChild(buildColumn(cat, i));
+    grid.appendChild(buildColumn(cat, i, maxVisible));
   });
 }
 
-function buildColumn(cat, index) {
+function buildColumn(cat, index, maxVisible) {
   const rgb = hexToRgb(cat.color);
   const col = document.createElement('div');
   col.className = 'column';
@@ -192,10 +192,38 @@ function buildColumn(cat, index) {
 
   const list = document.createElement('div');
   list.className = 'bookmark-list';
-  cat.bookmarks.forEach(bm => list.appendChild(buildBookmark(bm)));
+
+  const limit = (maxVisible && maxVisible > 0) ? maxVisible : null;
+  let visibleCount = 0;
+  const hiddenItems = [];
+
+  cat.bookmarks.forEach(bm => {
+    const el = buildBookmark(bm);
+    if (limit && bm.type !== 'separator' && visibleCount >= limit) {
+      el.classList.add('hidden');
+      hiddenItems.push(el);
+    } else {
+      if (bm.type !== 'separator') visibleCount++;
+    }
+    list.appendChild(el);
+  });
 
   col.appendChild(header);
   col.appendChild(list);
+
+  if (hiddenItems.length > 0) {
+    const expandBtn = document.createElement('button');
+    expandBtn.className = 'col-expand-btn';
+    expandBtn.title = 'Show more';
+    expandBtn.innerHTML = `<span class="col-expand-icon"></span><span class="col-expand-label">${hiddenItems.length} more</span>`;
+    expandBtn.addEventListener('click', () => {
+      const expanded = expandBtn.classList.toggle('expanded');
+      hiddenItems.forEach(el => el.classList.toggle('hidden', !expanded));
+      expandBtn.querySelector('.col-expand-label').textContent = expanded ? 'Show less' : `${hiddenItems.length} more`;
+    });
+    col.appendChild(expandBtn);
+  }
+
   return col;
 }
 
@@ -363,14 +391,15 @@ chrome.storage.onChanged.addListener((changes, area) => {
     const data = changes[STORAGE_KEY].newValue;
     if (!data) return;
     const settings = data.settings || {};
+    const maxVisible = settings.maxVisible || null;
     if (settings.dataSource === 'native') {
       loadNativeBookmarks(settings.nativeShowPath || false).then(nativeCategories => {
         const categories = nativeCategories !== null ? nativeCategories : data.categories;
-        renderGrid(categories);
+        renderGrid(categories, maxVisible);
         updateStats(categories);
       });
     } else {
-      renderGrid(data.categories);
+      renderGrid(data.categories, maxVisible);
       updateStats(data.categories);
     }
   }
@@ -386,6 +415,7 @@ async function init() {
   }
 
   const settings = data.settings || {};
+  const maxVisible = settings.maxVisible || null;
   let categories;
   if (settings.dataSource === 'native') {
     const nativeCategories = await loadNativeBookmarks(settings.nativeShowPath || false);
@@ -394,7 +424,7 @@ async function init() {
     categories = data.categories;
   }
 
-  renderGrid(categories);
+  renderGrid(categories, maxVisible);
   updateStats(categories);
   initClock();
   initCalendar();
