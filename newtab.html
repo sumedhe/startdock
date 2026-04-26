@@ -15,6 +15,7 @@
       --text-muted: #4a5568;
       --text-sub: #718096;
       --radius: 12px;
+      --card-opacity: 1;
     }
 
     html, body {
@@ -135,7 +136,7 @@
 
     /* ── Calendar widget ── */
     .calendar {
-      background: var(--surface);
+      background: rgba(19, 21, 31, var(--card-opacity));
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 10px 12px;
@@ -290,7 +291,7 @@
     }
 
     .column {
-      background: var(--surface);
+      background: rgba(19, 21, 31, var(--card-opacity));
       border: 1px solid var(--border);
       border-top: 3px solid var(--accent);
       border-radius: var(--radius);

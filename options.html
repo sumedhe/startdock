@@ -506,6 +506,34 @@
     }
 
     .toggle-row span { font-size: 13px; color: var(--text); }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      flex: 1;
+      height: 4px;
+      border: none;
+      padding: 0;
+      background: rgba(255,255,255,0.12);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      box-shadow: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--blue);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    input[type="range"]:focus {
+      border-color: transparent;
+      box-shadow: none;
+    }
   </style>
 </head>
 <body>
@@ -567,6 +595,51 @@
       <div style="margin-top:12px; display:flex; align-items:center; justify-content:space-between;">
         <label for="max-visible" style="font-size:13px; color:var(--text);">Max bookmarks per category</label>
         <input type="number" id="max-visible" min="1" max="100" step="1" placeholder="All" style="width:72px; text-align:center;">
+      </div>
+    </div>
+
+    <!-- Background Image -->
+    <div class="ds-section" id="bg-section">
+      <div class="ds-title">Background Image</div>
+      <div class="ds-toggle">
+        <button class="ds-option active" data-bg-mode="none">None</button>
+        <button class="ds-option" data-bg-mode="uploaded">Upload Image</button>
+        <button class="ds-option" data-bg-mode="random">Random Web</button>
+      </div>
+
+      <div id="bg-upload-opts" class="ds-native-opts">
+        <div id="bg-preview-wrap" style="display:none; margin-bottom:10px; border-radius:8px; overflow:hidden; border:1px solid var(--border);">
+          <img id="bg-preview" src="" alt="Background" style="display:block; width:100%; height:90px; object-fit:cover;">
+        </div>
+        <div class="io-row" style="margin-bottom:10px;">
+          <button class="btn btn-ghost" id="btn-bg-upload">&#8593; Upload image</button>
+          <button class="btn btn-danger" id="btn-bg-clear" style="display:none">&#10005; Clear image</button>
+        </div>
+        <input type="file" id="bg-file-input" accept="image/*" style="display:none">
+        <p class="ds-native-notice">Images are compressed and stored locally in your browser (not synced across devices).</p>
+      </div>
+
+      <div id="bg-random-opts" class="ds-native-opts">
+        <img id="bg-random-preview" src="" alt="Preview" style="display:none; width:100%; height:90px; object-fit:cover; border-radius:8px; border:1px solid var(--border); margin-bottom:10px;">
+        <div class="io-row" style="margin-bottom:10px;">
+          <button class="btn btn-ghost" id="btn-bg-shuffle">&#8635; New image</button>
+        </div>
+        <label class="toggle-row">
+          <input type="checkbox" id="bg-refresh-on-open">
+          <span>Refresh image each time a new tab opens</span>
+        </label>
+      </div>
+
+      <div id="bg-card-opts" style="display:none; margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
+        <label class="toggle-row" style="margin-bottom:10px;">
+          <input type="checkbox" id="card-transparency">
+          <span>Transparent bookmark cards</span>
+        </label>
+        <div id="card-opacity-row" style="display:none; align-items:center; gap:10px;">
+          <span style="font-size:13px; color:var(--text); white-space:nowrap;">Opacity</span>
+          <input type="range" id="card-opacity-slider" min="10" max="100" value="85">
+          <span id="card-opacity-val" style="font-size:13px; color:var(--text-sub); min-width:36px; text-align:right;">85%</span>
+        </div>
       </div>
     </div>
 

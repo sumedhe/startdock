@@ -483,7 +483,7 @@ function attachCatEvents(block, ci) {
 function applyDataSourceUI(source) {
   const isNative = source === 'native';
 
-  document.querySelectorAll('.ds-option').forEach(btn => {
+  document.querySelectorAll('[data-source]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.source === source);
   });
 
@@ -503,7 +503,7 @@ function initDataSource() {
   const maxInput = document.getElementById('max-visible');
   maxInput.value = settings.maxVisible != null ? settings.maxVisible : '';
 
-  document.querySelectorAll('.ds-option').forEach(btn => {
+  document.querySelectorAll('[data-source]').forEach(btn => {
     btn.addEventListener('click', () => {
       const source = btn.dataset.source;
       if (!data.settings) data.settings = {};
@@ -708,6 +708,192 @@ function initImportExport() {
   });
 }
 
+/* ── Background image ── */
+
+function loadBgImage() {
+  return new Promise(resolve => {
+    chrome.storage.local.get('startdock_bg', r => resolve(r.startdock_bg || null));
+  });
+}
+
+function saveBgImage(dataUrl) {
+  return new Promise(resolve => {
+    chrome.storage.local.set({ startdock_bg: dataUrl }, resolve);
+  });
+}
+
+function clearBgImage() {
+  return new Promise(resolve => {
+    chrome.storage.local.remove('startdock_bg', resolve);
+  });
+}
+
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_W = 1920, MAX_H = 1080;
+        let w = img.width, h = img.height;
+        if (w > MAX_W || h > MAX_H) {
+          const ratio = Math.min(MAX_W / w, MAX_H / h);
+          w = Math.round(w * ratio);
+          h = Math.round(h * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function initBackground() {
+  const settings = data.settings || {};
+  let bgMode = settings.backgroundMode || 'none';
+
+  function applyBgMode(mode) {
+    document.querySelectorAll('[data-bg-mode]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.bgMode === mode);
+    });
+    document.getElementById('bg-upload-opts').classList.toggle('visible', mode === 'uploaded');
+    document.getElementById('bg-random-opts').classList.toggle('visible', mode === 'random');
+    document.getElementById('bg-card-opts').style.display = mode !== 'none' ? 'block' : 'none';
+  }
+
+  applyBgMode(bgMode);
+
+  const transparencyCheckbox = document.getElementById('card-transparency');
+  const opacitySlider = document.getElementById('card-opacity-slider');
+  const opacityVal = document.getElementById('card-opacity-val');
+  const opacityRow = document.getElementById('card-opacity-row');
+
+  transparencyCheckbox.checked = settings.cardTransparency || false;
+  opacitySlider.value = settings.cardOpacity ?? 85;
+  opacityVal.textContent = `${opacitySlider.value}%`;
+  opacityRow.style.display = transparencyCheckbox.checked ? 'flex' : 'none';
+
+  if (bgMode === 'uploaded') {
+    const imgData = await loadBgImage();
+    if (imgData) {
+      document.getElementById('bg-preview').src = imgData;
+      document.getElementById('bg-preview-wrap').style.display = 'block';
+      document.getElementById('btn-bg-clear').style.display = '';
+    }
+  }
+
+  if (bgMode === 'random' && settings.randomBgSeed) {
+    const preview = document.getElementById('bg-random-preview');
+    preview.src = `https://picsum.photos/seed/${settings.randomBgSeed}/400/90`;
+    preview.style.display = 'block';
+  }
+
+  document.getElementById('bg-refresh-on-open').checked = settings.refreshBgOnOpen || false;
+
+  document.querySelectorAll('[data-bg-mode]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const mode = btn.dataset.bgMode;
+      bgMode = mode;
+      if (!data.settings) data.settings = {};
+      data.settings.backgroundMode = mode;
+      if (mode === 'random' && !data.settings.randomBgSeed) {
+        data.settings.randomBgSeed = Math.floor(Math.random() * 1000000);
+      }
+      if (mode === 'random') {
+        const seed = data.settings.randomBgSeed;
+        const preview = document.getElementById('bg-random-preview');
+        preview.src = `https://picsum.photos/seed/${seed}/400/90`;
+        preview.style.display = 'block';
+      }
+      applyBgMode(mode);
+      markDirty();
+      await handleSave();
+    });
+  });
+
+  document.getElementById('btn-bg-upload').addEventListener('click', () => {
+    document.getElementById('bg-file-input').click();
+  });
+
+  document.getElementById('bg-file-input').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const compressed = await compressImage(file);
+      await saveBgImage(compressed);
+      document.getElementById('bg-preview').src = compressed;
+      document.getElementById('bg-preview-wrap').style.display = 'block';
+      document.getElementById('btn-bg-clear').style.display = '';
+      if (!data.settings) data.settings = {};
+      data.settings.backgroundMode = 'uploaded';
+      bgMode = 'uploaded';
+      applyBgMode('uploaded');
+      markDirty();
+      await handleSave();
+    } catch (err) {
+      console.error('StartDock: image upload failed', err);
+      alert('Failed to process image. Please try a different file.');
+    }
+    e.target.value = '';
+  });
+
+  document.getElementById('btn-bg-clear').addEventListener('click', async () => {
+    await clearBgImage();
+    document.getElementById('bg-preview').src = '';
+    document.getElementById('bg-preview-wrap').style.display = 'none';
+    document.getElementById('btn-bg-clear').style.display = 'none';
+    if (!data.settings) data.settings = {};
+    data.settings.backgroundMode = 'none';
+    bgMode = 'none';
+    applyBgMode('none');
+    markDirty();
+    await handleSave();
+  });
+
+  document.getElementById('btn-bg-shuffle').addEventListener('click', async () => {
+    const seed = Math.floor(Math.random() * 1000000);
+    if (!data.settings) data.settings = {};
+    data.settings.randomBgSeed = seed;
+    const preview = document.getElementById('bg-random-preview');
+    preview.src = `https://picsum.photos/seed/${seed}/400/90`;
+    preview.style.display = 'block';
+    markDirty();
+    await handleSave();
+  });
+
+  document.getElementById('bg-refresh-on-open').addEventListener('change', async e => {
+    if (!data.settings) data.settings = {};
+    data.settings.refreshBgOnOpen = e.target.checked;
+    markDirty();
+    await handleSave();
+  });
+
+  transparencyCheckbox.addEventListener('change', async e => {
+    if (!data.settings) data.settings = {};
+    data.settings.cardTransparency = e.target.checked;
+    opacityRow.style.display = e.target.checked ? 'flex' : 'none';
+    markDirty();
+    await handleSave();
+  });
+
+  opacitySlider.addEventListener('input', e => {
+    opacityVal.textContent = `${e.target.value}%`;
+  });
+
+  opacitySlider.addEventListener('change', async e => {
+    if (!data.settings) data.settings = {};
+    data.settings.cardOpacity = parseInt(e.target.value, 10);
+    markDirty();
+    await handleSave();
+  });
+}
+
 /* ── Init ── */
 
 async function init() {
@@ -723,6 +909,7 @@ async function init() {
   initSaveButton();
   initQuickAdd();
   initImportExport();
+  await initBackground();
 }
 
 init();

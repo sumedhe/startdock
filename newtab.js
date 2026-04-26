@@ -133,6 +133,8 @@ function loadNativeBookmarks(showPath) {
   });
 }
 
+let currentSettings = {};
+
 /* ── Utilities ── */
 
 function hexToRgb(hex) {
@@ -149,6 +151,51 @@ function faviconUrl(url) {
   } catch {
     return '';
   }
+}
+
+function loadBgImage() {
+  return new Promise(resolve => {
+    chrome.storage.local.get('startdock_bg', r => resolve(r.startdock_bg || null));
+  });
+}
+
+function setBackground(url) {
+  const overlay = 'linear-gradient(rgba(11,13,20,0.5),rgba(11,13,20,0.5))';
+  document.body.style.backgroundImage = `${overlay}, url("${url}")`;
+  document.body.style.backgroundSize = 'auto, cover';
+  document.body.style.backgroundPosition = 'top left, center center';
+  document.body.style.backgroundAttachment = 'fixed, fixed';
+  document.body.style.backgroundRepeat = 'repeat, no-repeat';
+}
+
+function clearBackground() {
+  document.body.style.backgroundImage = '';
+  document.body.style.backgroundSize = '';
+  document.body.style.backgroundPosition = '';
+  document.body.style.backgroundAttachment = '';
+  document.body.style.backgroundRepeat = '';
+}
+
+async function applyBackground(settings) {
+  const mode = settings.backgroundMode || 'none';
+  if (mode === 'none') { clearBackground(); return; }
+  if (mode === 'uploaded') {
+    const dataUrl = await loadBgImage();
+    if (dataUrl) setBackground(dataUrl); else clearBackground();
+    return;
+  }
+  if (mode === 'random') {
+    const seed = settings.refreshBgOnOpen ? Date.now() : (settings.randomBgSeed || 42);
+    setBackground(`https://picsum.photos/seed/${seed}/1920/1080`);
+  }
+}
+
+function applyCardTransparency(settings) {
+  const hasImage = (settings.backgroundMode || 'none') !== 'none';
+  const opacity = (hasImage && settings.cardTransparency)
+    ? ((settings.cardOpacity ?? 85) / 100)
+    : 1;
+  document.documentElement.style.setProperty('--card-opacity', opacity);
 }
 
 function loadData() {
@@ -390,10 +437,10 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'sync' && changes[STORAGE_KEY]) {
     const data = changes[STORAGE_KEY].newValue;
     if (!data) return;
-    const settings = data.settings || {};
-    const maxVisible = settings.maxVisible || null;
-    if (settings.dataSource === 'native') {
-      loadNativeBookmarks(settings.nativeShowPath || false).then(nativeCategories => {
+    currentSettings = data.settings || {};
+    const maxVisible = currentSettings.maxVisible || null;
+    if (currentSettings.dataSource === 'native') {
+      loadNativeBookmarks(currentSettings.nativeShowPath || false).then(nativeCategories => {
         const categories = nativeCategories !== null ? nativeCategories : data.categories;
         renderGrid(categories, maxVisible);
         updateStats(categories);
@@ -401,6 +448,14 @@ chrome.storage.onChanged.addListener((changes, area) => {
     } else {
       renderGrid(data.categories, maxVisible);
       updateStats(data.categories);
+    }
+    applyBackground(currentSettings);
+    applyCardTransparency(currentSettings);
+  }
+  if (area === 'local' && changes['startdock_bg']) {
+    if ((currentSettings.backgroundMode || 'none') === 'uploaded') {
+      const newVal = changes['startdock_bg'].newValue;
+      if (newVal) setBackground(newVal); else clearBackground();
     }
   }
 });
@@ -415,6 +470,7 @@ async function init() {
   }
 
   const settings = data.settings || {};
+  currentSettings = settings;
   const maxVisible = settings.maxVisible || null;
   let categories;
   if (settings.dataSource === 'native') {
@@ -426,6 +482,8 @@ async function init() {
 
   renderGrid(categories, maxVisible);
   updateStats(categories);
+  await applyBackground(settings);
+  applyCardTransparency(settings);
   initClock();
   initCalendar();
   initSearch();
