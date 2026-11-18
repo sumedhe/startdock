@@ -431,6 +431,27 @@ function initSettings() {
   });
 }
 
+/* ── Refresh background button ── */
+
+function updateRefreshBtnVisibility(settings) {
+  const btn = document.getElementById('refresh-bg-btn');
+  btn.classList.toggle('visible', (settings.backgroundMode || 'none') === 'random');
+}
+
+function initRefreshBgBtn() {
+  document.getElementById('refresh-bg-btn').addEventListener('click', async () => {
+    const seed = Math.floor(Math.random() * 1000000);
+    setBackground(`https://picsum.photos/seed/${seed}/1920/1080`);
+    currentSettings.randomBgSeed = seed;
+    const stored = await new Promise(resolve => chrome.storage.sync.get(STORAGE_KEY, r => resolve(r[STORAGE_KEY])));
+    if (stored) {
+      if (!stored.settings) stored.settings = {};
+      stored.settings.randomBgSeed = seed;
+      chrome.storage.sync.set({ [STORAGE_KEY]: stored });
+    }
+  });
+}
+
 /* ── Storage change listener (live updates when options page saves) ── */
 
 chrome.storage.onChanged.addListener((changes, area) => {
@@ -451,6 +472,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
     }
     applyBackground(currentSettings);
     applyCardTransparency(currentSettings);
+    updateRefreshBtnVisibility(currentSettings);
   }
   if (area === 'local' && changes['startdock_bg']) {
     if ((currentSettings.backgroundMode || 'none') === 'uploaded') {
@@ -484,10 +506,12 @@ async function init() {
   updateStats(categories);
   await applyBackground(settings);
   applyCardTransparency(settings);
+  updateRefreshBtnVisibility(settings);
   initClock();
   initCalendar();
   initSearch();
   initSettings();
+  initRefreshBgBtn();
 }
 
 init();

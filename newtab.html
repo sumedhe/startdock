@@ -112,10 +112,16 @@
     }
 
     /* ── Settings button ── */
-    .settings-btn {
+    .hero-btns {
       position: absolute;
       top: 16px;
       right: 16px;
+      display: flex;
+      gap: 6px;
+      z-index: 10;
+    }
+
+    .settings-btn, .refresh-bg-btn {
       background: none;
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -125,14 +131,16 @@
       cursor: pointer;
       font-size: 14px;
       transition: border-color 0.15s, color 0.15s, background 0.15s;
-      z-index: 10;
     }
 
-    .settings-btn:hover {
+    .settings-btn:hover, .refresh-bg-btn:hover {
       border-color: rgba(255,255,255,0.2);
       color: var(--text);
       background: rgba(255,255,255,0.04);
     }
+
+    .refresh-bg-btn { display: none; }
+    .refresh-bg-btn.visible { display: flex; }
 
     /* ── Calendar widget ── */
     .calendar {
@@ -478,7 +486,10 @@
 <body>
 
   <div class="hero">
-    <button class="settings-btn" id="settings-btn" title="Settings">&#9881;</button>
+    <div class="hero-btns">
+      <button class="refresh-bg-btn" id="refresh-bg-btn" title="New background image">&#8635;</button>
+      <button class="settings-btn" id="settings-btn" title="Settings">&#9881;</button>
+    </div>
     <div class="hero-inner">
       <div class="hero-left">
         <div class="hero-greeting" id="greeting">Good morning</div>
