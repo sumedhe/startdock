@@ -67,3 +67,5 @@ Pull requests are welcome. Please open an issue first to discuss any significant
 ## License
 
 [MIT](LICENSE)
+
+- [Historical project reference](docs/review-reference.md): retained historical material; consult current plans and trackers before using it.
